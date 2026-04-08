@@ -56,4 +56,12 @@ class RollListViewModel @Inject constructor(
             repository.deleteRoll(rollId)
         }
     }
+
+    fun toggleRollComplete(rollId: Long) {
+        viewModelScope.launch {
+            repository.getRollById(rollId)?.let { roll ->
+                repository.toggleRollComplete(roll)
+            }
+        }
+    }
 }

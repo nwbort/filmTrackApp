@@ -27,6 +27,16 @@ class RollRepository @Inject constructor(
         roll.copy(updatedAt = System.currentTimeMillis())
     )
 
+    suspend fun toggleRollComplete(roll: Roll) {
+        val now = System.currentTimeMillis()
+        val updated = if (roll.dateFinished == null) {
+            roll.copy(dateFinished = now, updatedAt = now)
+        } else {
+            roll.copy(dateFinished = null, updatedAt = now)
+        }
+        rollDao.updateRoll(updated)
+    }
+
     suspend fun deleteRoll(id: Long) = rollDao.deleteRollById(id)
 
     fun getFramesForRoll(rollId: Long): Flow<List<Frame>> = frameDao.getFramesForRoll(rollId)

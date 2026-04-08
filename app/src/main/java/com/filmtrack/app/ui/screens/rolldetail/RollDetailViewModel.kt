@@ -56,4 +56,12 @@ class RollDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun toggleComplete() {
+        viewModelScope.launch {
+            uiState.value.roll?.let { roll ->
+                repository.toggleRollComplete(roll)
+            }
+        }
+    }
 }
