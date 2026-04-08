@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CameraRoll
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -135,6 +136,7 @@ fun RollListScreen(
                         items(uiState.rolls, key = { it.roll.id }) { rollWithCount ->
                             RollCard(
                                 rollWithCount = rollWithCount,
+                                isActive = rollWithCount.roll.id == uiState.activeRollId,
                                 onClick = { onRollClick(rollWithCount.roll.id) },
                                 onDeleteClick = { rollToDelete = rollWithCount.roll.id }
                             )
@@ -149,6 +151,7 @@ fun RollListScreen(
 @Composable
 private fun RollCard(
     rollWithCount: RollWithFrameCount,
+    isActive: Boolean,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -173,12 +176,24 @@ private fun RollCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = roll.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = roll.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (isActive) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                Icons.Default.CameraAlt,
+                                contentDescription = "Active widget roll",
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     if (roll.filmStock.isNotBlank()) {
                         Text(
                             text = roll.filmStock,

@@ -68,8 +68,8 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
-    onBackClick: () -> Unit,
-    onPhotoCaptured: () -> Unit,
+    onBackClick: (rollId: Long?) -> Unit,
+    onPhotoCaptured: (rollId: Long?) -> Unit,
     isQuickCapture: Boolean = false,
     viewModel: CameraViewModel = hiltViewModel()
 ) {
@@ -93,7 +93,7 @@ fun CameraScreen(
 
     if (!cameraPermissionGranted) {
         PermissionRequest(
-            onBackClick = onBackClick,
+            onBackClick = { onBackClick(uiState.roll?.id) },
             onRequestPermission = { permissionsState.launchMultiplePermissionRequest() }
         )
         return
@@ -117,11 +117,10 @@ fun CameraScreen(
 
     CameraContent(
         uiState = uiState,
-        onBackClick = onBackClick,
+        onBackClick = { onBackClick(uiState.roll?.id) },
         onCapture = { imageCapture, executor ->
             viewModel.capturePhoto(imageCapture, executor)
         },
-        onPhotoCaptured = onPhotoCaptured,
         onResetState = viewModel::resetCaptureState,
         onRollNameClick = viewModel::showRollPicker
     )
@@ -186,7 +185,6 @@ private fun CameraContent(
     uiState: CameraUiState,
     onBackClick: () -> Unit,
     onCapture: (ImageCapture, java.util.concurrent.Executor) -> Unit,
-    onPhotoCaptured: () -> Unit,
     onResetState: () -> Unit,
     onRollNameClick: () -> Unit
 ) {
