@@ -47,7 +47,8 @@ data class CameraUiState(
     val captureState: CaptureState = CaptureState.Idle,
     val isLoading: Boolean = true,
     val allRolls: List<Roll> = emptyList(),
-    val showRollPicker: Boolean = false
+    val showRollPicker: Boolean = false,
+    val locationReady: Boolean = false
 )
 
 @HiltViewModel
@@ -66,8 +67,14 @@ class CameraViewModel @Inject constructor(
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
 
     private var resolvedRollId: Long = rollId
+    private var prefetchedLocation: Pair<Double, Double>? = null
 
     init {
+        // Start fetching location immediately so it's ready when the shutter is pressed
+        viewModelScope.launch {
+            prefetchedLocation = getLocation()
+            _uiState.update { it.copy(locationReady = true) }
+        }
         viewModelScope.launch {
             val roll = when {
                 isQuickCapture -> {
@@ -130,7 +137,7 @@ class CameraViewModel @Inject constructor(
                 val frameNumber = _uiState.value.nextFrameNumber
                 val timestamp = System.currentTimeMillis()
 
-                val location = getLocation()
+                val location = prefetchedLocation ?: getLocation()
                 val photoUri = saveToMediaStore(imageCapture, executor, roll.name, frameNumber)
 
                 repository.addFrame(
