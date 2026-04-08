@@ -52,7 +52,11 @@ data class ApplyMetadataUiState(
     val processedCount: Int = 0,
     val totalToProcess: Int = 0,
     val error: String? = null,
-    val outputFolderName: String? = null
+    val outputFolderName: String? = null,
+    val inPairVerification: Boolean = false,
+    val verifyFrameIndex: Int = 0,
+    val verifyScanIndex: Int = 0,
+    val verifiedPairs: List<Pair<Int, Int>> = emptyList()
 )
 
 @HiltViewModel
@@ -247,6 +251,38 @@ class ApplyMetadataViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun enterPairVerification() {
+        _uiState.update { it.copy(inPairVerification = true, verifyFrameIndex = 0, verifyScanIndex = 0, verifiedPairs = emptyList()) }
+    }
+
+    fun confirmPair() {
+        val state = _uiState.value
+        val pairs = state.verifiedPairs + (state.verifyFrameIndex to state.verifyScanIndex)
+        val nextFrame = state.verifyFrameIndex + 1
+        val nextScan = state.verifyScanIndex + 1
+        if (nextFrame >= state.frames.size || nextScan >= state.scanFiles.size) {
+            val reordered = pairs.map { (_, si) -> state.scanFiles[si] }
+            _uiState.update { it.copy(inPairVerification = false, scanFiles = reordered, verifiedPairs = emptyList()) }
+        } else {
+            _uiState.update { it.copy(verifyFrameIndex = nextFrame, verifyScanIndex = nextScan, verifiedPairs = pairs) }
+        }
+    }
+
+    fun skipScan() {
+        val state = _uiState.value
+        val nextScan = state.verifyScanIndex + 1
+        if (nextScan >= state.scanFiles.size) {
+            val reordered = state.verifiedPairs.map { (_, si) -> state.scanFiles[si] }
+            _uiState.update { it.copy(inPairVerification = false, scanFiles = reordered, verifiedPairs = emptyList()) }
+        } else {
+            _uiState.update { it.copy(verifyScanIndex = nextScan) }
+        }
+    }
+
+    fun exitPairVerification() {
+        _uiState.update { it.copy(inPairVerification = false, verifiedPairs = emptyList()) }
     }
 
     fun resetToPickSource() {
