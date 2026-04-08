@@ -11,6 +11,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,20 +23,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +59,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.filmtrack.app.data.model.Roll
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -98,6 +106,15 @@ fun CameraScreen(
         return
     }
 
+    if (uiState.showRollPicker) {
+        RollPickerDialog(
+            rolls = uiState.allRolls,
+            currentRollId = uiState.roll?.id,
+            onSelectRoll = viewModel::selectRoll,
+            onDismiss = viewModel::hideRollPicker
+        )
+    }
+
     CameraContent(
         uiState = uiState,
         onBackClick = onBackClick,
@@ -105,7 +122,62 @@ fun CameraScreen(
             viewModel.capturePhoto(imageCapture, executor)
         },
         onPhotoCaptured = onPhotoCaptured,
-        onResetState = viewModel::resetCaptureState
+        onResetState = viewModel::resetCaptureState,
+        onRollNameClick = viewModel::showRollPicker
+    )
+}
+
+@Composable
+private fun RollPickerDialog(
+    rolls: List<Roll>,
+    currentRollId: Long?,
+    onSelectRoll: (Roll) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Roll") },
+        text = {
+            if (rolls.isEmpty()) {
+                Text("No rolls available.")
+            } else {
+                LazyColumn {
+                    items(rolls, key = { it.id }) { roll ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelectRoll(roll) }
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(roll.name, style = MaterialTheme.typography.bodyLarge)
+                                if (roll.filmStock.isNotBlank()) {
+                                    Text(
+                                        roll.filmStock,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            if (roll.id == currentRollId) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
     )
 }
 
@@ -115,7 +187,8 @@ private fun CameraContent(
     onBackClick: () -> Unit,
     onCapture: (ImageCapture, java.util.concurrent.Executor) -> Unit,
     onPhotoCaptured: () -> Unit,
-    onResetState: () -> Unit
+    onResetState: () -> Unit,
+    onRollNameClick: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -195,11 +268,25 @@ private fun CameraContent(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    uiState.roll?.name ?: "",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
-                )
+                Row(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClick = onRollNameClick)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        uiState.roll?.name ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White
+                    )
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        contentDescription = "Select roll",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
                 Text(
                     "Frame ${uiState.nextFrameNumber}" +
                         (uiState.roll?.let { " of ${it.exposureCount}" } ?: ""),

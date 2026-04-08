@@ -21,6 +21,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
@@ -43,7 +44,9 @@ data class CameraUiState(
     val roll: Roll? = null,
     val nextFrameNumber: Int = 1,
     val captureState: CaptureState = CaptureState.Idle,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val allRolls: List<Roll> = emptyList(),
+    val showRollPicker: Boolean = false
 )
 
 @HiltViewModel
@@ -72,12 +75,31 @@ class CameraViewModel @Inject constructor(
             roll?.let {
                 resolvedRollId = it.id
                 val nextFrame = repository.getNextFrameNumber(it.id)
-                _uiState.value = CameraUiState(
-                    roll = it,
-                    nextFrameNumber = nextFrame,
-                    isLoading = false
-                )
+                _uiState.update { state ->
+                    state.copy(roll = roll, nextFrameNumber = nextFrame, isLoading = false)
+                }
             }
+        }
+        viewModelScope.launch {
+            repository.getAllRolls().collect { rolls ->
+                _uiState.update { it.copy(allRolls = rolls) }
+            }
+        }
+    }
+
+    fun showRollPicker() {
+        _uiState.update { it.copy(showRollPicker = true) }
+    }
+
+    fun hideRollPicker() {
+        _uiState.update { it.copy(showRollPicker = false) }
+    }
+
+    fun selectRoll(roll: Roll) {
+        viewModelScope.launch {
+            resolvedRollId = roll.id
+            val nextFrame = repository.getNextFrameNumber(roll.id)
+            _uiState.update { it.copy(roll = roll, nextFrameNumber = nextFrame, showRollPicker = false) }
         }
     }
 
