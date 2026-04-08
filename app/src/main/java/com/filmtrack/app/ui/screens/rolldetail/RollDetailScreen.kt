@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,6 +63,7 @@ fun RollDetailScreen(
     onBackClick: () -> Unit,
     onEditClick: (Long) -> Unit,
     onCaptureClick: (Long) -> Unit,
+    onApplyMetadataClick: (Long) -> Unit,
     viewModel: RollDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -128,6 +130,9 @@ fun RollDetailScreen(
                 },
                 actions = {
                     uiState.roll?.let { roll ->
+                        IconButton(onClick = { onApplyMetadataClick(roll.id) }) {
+                            Icon(Icons.Default.Tune, "Apply Metadata to Scans")
+                        }
                         IconButton(onClick = { onEditClick(roll.id) }) {
                             Icon(Icons.Default.Edit, "Edit Roll")
                         }

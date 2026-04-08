@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.filmtrack.app.ui.screens.applymetadata.ApplyMetadataScreen
 import com.filmtrack.app.ui.screens.camera.CameraScreen
 import com.filmtrack.app.ui.screens.editroll.EditRollScreen
 import com.filmtrack.app.ui.screens.rolldetail.RollDetailScreen
@@ -18,10 +19,12 @@ object Routes {
     const val NEW_ROLL = "new_roll"
     const val CAMERA = "camera/{rollId}"
     const val CAMERA_QUICK = "camera_quick"
+    const val APPLY_METADATA = "apply_metadata/{rollId}"
 
     fun rollDetail(rollId: Long) = "roll_detail/$rollId"
     fun editRoll(rollId: Long) = "edit_roll/$rollId"
     fun camera(rollId: Long) = "camera/$rollId"
+    fun applyMetadata(rollId: Long) = "apply_metadata/$rollId"
 }
 
 @Composable
@@ -55,6 +58,9 @@ fun FilmTrackNavGraph(
                 },
                 onCaptureClick = { rollId ->
                     navController.navigate(Routes.camera(rollId))
+                },
+                onApplyMetadataClick = { rollId ->
+                    navController.navigate(Routes.applyMetadata(rollId))
                 }
             )
         }
@@ -87,6 +93,15 @@ fun FilmTrackNavGraph(
             CameraScreen(
                 onBackClick = { navController.popBackStack() },
                 onPhotoCaptured = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.APPLY_METADATA,
+            arguments = listOf(navArgument("rollId") { type = NavType.LongType })
+        ) {
+            ApplyMetadataScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 
