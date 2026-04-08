@@ -2,12 +2,15 @@ package com.filmtrack.app.ui.screens.rolls
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,10 +44,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -158,6 +168,7 @@ private fun RollCard(
 ) {
     val roll = rollWithCount.roll
     val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
+    val hasThumbnails = rollWithCount.thumbnailUris.isNotEmpty()
 
     Card(
         modifier = Modifier
@@ -172,85 +183,177 @@ private fun RollCard(
         ),
         border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Column {
+            // Metadata section — reduced bottom padding when filmstrip follows
+            Column(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp,
+                    bottom = if (hasThumbnails) 8.dp else 16.dp
+                )
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = roll.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        if (isActive) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Icon(
-                                Icons.Default.CameraAlt,
-                                contentDescription = "Active widget roll",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = roll.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            if (isActive) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(
+                                    Icons.Default.CameraAlt,
+                                    contentDescription = "Active widget roll",
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                        if (roll.filmStock.isNotBlank()) {
+                            Text(
+                                text = roll.filmStock,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-                    if (roll.filmStock.isNotBlank()) {
-                        Text(
-                            text = roll.filmStock,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-                IconButton(onClick = onDeleteClick) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row {
+                        if (roll.camera.isNotBlank()) {
+                            Text(
+                                text = roll.camera,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+                        if (roll.iso.isNotBlank()) {
+                            Text(
+                                text = "ISO ${roll.iso}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Text(
+                        text = "${rollWithCount.frameCount}/${roll.exposureCount}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row {
-                    if (roll.camera.isNotBlank()) {
-                        Text(
-                            text = roll.camera,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                    }
-                    if (roll.iso.isNotBlank()) {
-                        Text(
-                            text = "ISO ${roll.iso}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
                 Text(
-                    text = "${rollWithCount.frameCount}/${roll.exposureCount}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    text = dateFormat.format(Date(roll.dateStarted)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Text(
-                text = dateFormat.format(Date(roll.dateStarted)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // Filmstrip — edge-to-edge at bottom of card
+            if (hasThumbnails) {
+                FilmstripThumbnails(uris = rollWithCount.thumbnailUris)
+            }
         }
+    }
+}
+
+// ---------- Filmstrip composable ----------
+
+private val FilmDark = Color(0xFF111111)
+private val FilmSprocket = Color(0xFF323232)
+
+@Composable
+private fun FilmstripThumbnails(uris: List<String>) {
+    val thumbnailSize = 60.dp
+    val sprocketZone = 10.dp
+    val stripHeight = thumbnailSize + sprocketZone * 2
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(stripHeight)
+    ) {
+        // Film background + sprocket holes via Canvas
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawRect(FilmDark)
+
+            val holeW = 7.dp.toPx()
+            val holeH = 5.dp.toPx()
+            val holeR = 1.5.dp.toPx()
+            val pitch = 19.dp.toPx()
+            val zoneH = sprocketZone.toPx()
+            val topY = (zoneH - holeH) / 2f
+            val botY = size.height - zoneH + (zoneH - holeH) / 2f
+
+            var x = pitch / 2f
+            while (x + holeW <= size.width) {
+                drawRoundRect(
+                    color = FilmSprocket,
+                    topLeft = Offset(x, topY),
+                    size = Size(holeW, holeH),
+                    cornerRadius = CornerRadius(holeR)
+                )
+                drawRoundRect(
+                    color = FilmSprocket,
+                    topLeft = Offset(x, botY),
+                    size = Size(holeW, holeH),
+                    cornerRadius = CornerRadius(holeR)
+                )
+                x += pitch
+            }
+        }
+
+        // Square thumbnails
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .height(thumbnailSize)
+                .padding(start = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            uris.forEach { uri ->
+                AsyncImage(
+                    model = uri,
+                    contentDescription = null,
+                    modifier = Modifier.size(thumbnailSize),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+
+        // Right-edge fade — photos dissolve into the film
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(80.dp)
+                .align(Alignment.CenterEnd)
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(Color.Transparent, FilmDark)
+                    )
+                )
+        )
     }
 }
