@@ -2,11 +2,14 @@ package com.filmtrack.app.ui.screens.applymetadata
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,17 +18,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,11 +54,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.filmtrack.app.data.model.Frame
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -81,16 +91,46 @@ fun ApplyMetadataScreen(
         }
     }
 
+    val inConfirmMode = uiState.confirmState != null
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Apply Metadata to Scans") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+            if (inConfirmMode) {
+                val cs = uiState.confirmState!!
+                CenterAlignedTopAppBar(
+                    title = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Confirm Pairs", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Frame ${cs.frameIndex + 1}/${uiState.frames.size} · ${cs.confirmedPairs.size} confirmed",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = viewModel::exitConfirmMode) {
+                            Icon(Icons.Default.Close, "Exit confirm mode")
+                        }
+                    },
+                    actions = {
+                        if (cs.confirmedPairs.isNotEmpty()) {
+                            TextButton(onClick = { viewModel.applyConfirmedPairs() }) {
+                                Text("Apply ${cs.confirmedPairs.size}")
+                            }
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                CenterAlignedTopAppBar(
+                    title = { Text("Apply Metadata to Scans") },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        }
+                    }
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -99,28 +139,38 @@ fun ApplyMetadataScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (uiState.step) {
-                ApplyStep.PICK_SOURCE -> PickSourceStep(
-                    isLoading = uiState.isLoading,
-                    onSelectZip = { zipLauncher.launch(arrayOf("*/*")) },
-                    onSelectFolder = { folderLauncher.launch(null) }
-                )
-                ApplyStep.REVIEW -> ReviewStep(
+            if (inConfirmMode) {
+                ConfirmModeContent(
                     uiState = uiState,
-                    onReverse = viewModel::reverseScanOrder,
-                    onMoveUp = viewModel::moveScanUp,
-                    onMoveDown = viewModel::moveScanDown,
-                    onPickDifferentSource = viewModel::resetToPickSource,
-                    onSelectZip = { zipLauncher.launch(arrayOf("*/*")) },
-                    onSelectFolder = { folderLauncher.launch(null) },
-                    onApply = viewModel::applyMetadata
+                    onConfirm = viewModel::confirmPair,
+                    onSkip = viewModel::skipScan
                 )
-                ApplyStep.PROCESSING -> ProcessingStep(uiState)
-                ApplyStep.DONE -> DoneStep(uiState, onDone = onBackClick)
+            } else {
+                when (uiState.step) {
+                    ApplyStep.PICK_SOURCE -> PickSourceStep(
+                        isLoading = uiState.isLoading,
+                        onSelectZip = { zipLauncher.launch(arrayOf("*/*")) },
+                        onSelectFolder = { folderLauncher.launch(null) }
+                    )
+                    ApplyStep.REVIEW -> ReviewStep(
+                        uiState = uiState,
+                        onReverse = viewModel::reverseScanOrder,
+                        onMoveUp = viewModel::moveScanUp,
+                        onMoveDown = viewModel::moveScanDown,
+                        onSelectZip = { zipLauncher.launch(arrayOf("*/*")) },
+                        onSelectFolder = { folderLauncher.launch(null) },
+                        onStartConfirm = viewModel::startConfirmMode,
+                        onApply = viewModel::applyMetadata
+                    )
+                    ApplyStep.PROCESSING -> ProcessingStep(uiState)
+                    ApplyStep.DONE -> DoneStep(uiState, onDone = onBackClick)
+                }
             }
         }
     }
 }
+
+// ─── Pick source ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun PickSourceStep(
@@ -141,28 +191,19 @@ private fun PickSourceStep(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    "Select your scanned photos",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Text("Select your scanned photos", style = MaterialTheme.typography.titleMedium)
                 Text(
                     "Choose a ZIP file or folder containing the scanned images. They will be matched to frames in order.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(8.dp))
-                FilledTonalButton(
-                    onClick = onSelectZip,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                FilledTonalButton(onClick = onSelectZip, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.ZoomIn, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Open ZIP File")
                 }
-                FilledTonalButton(
-                    onClick = onSelectFolder,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                FilledTonalButton(onClick = onSelectFolder, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.Folder, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Open Folder")
@@ -172,15 +213,17 @@ private fun PickSourceStep(
     }
 }
 
+// ─── Review / reorder list ───────────────────────────────────────────────────
+
 @Composable
 private fun ReviewStep(
     uiState: ApplyMetadataUiState,
     onReverse: () -> Unit,
     onMoveUp: (Int) -> Unit,
     onMoveDown: (Int) -> Unit,
-    onPickDifferentSource: () -> Unit,
     onSelectZip: () -> Unit,
     onSelectFolder: () -> Unit,
+    onStartConfirm: () -> Unit,
     onApply: () -> Unit
 ) {
     val frames = uiState.frames
@@ -192,16 +235,12 @@ private fun ReviewStep(
     Column(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Summary header
             item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                    )
-                ) {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             "${frames.size} frames · ${scans.size} scans · $pairCount will be processed",
@@ -232,12 +271,10 @@ private fun ReviewStep(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedButton(onClick = onReverse) {
-                            Icon(Icons.Default.SwapVert, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(if (uiState.isReversed) "Reversed" else "Reverse")
-                        }
+                    OutlinedButton(onClick = onReverse) {
+                        Icon(Icons.Default.SwapVert, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(if (uiState.isReversed) "Reversed" else "Reverse")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         TextButton(onClick = onSelectZip) { Text("ZIP") }
@@ -250,7 +287,6 @@ private fun ReviewStep(
             itemsIndexed(scans) { index, scan ->
                 val frame = frames.getOrNull(index)
                 PairRow(
-                    index = index,
                     scan = scan,
                     frame = frame,
                     isFirst = index == 0,
@@ -260,12 +296,23 @@ private fun ReviewStep(
                 )
             }
 
-            // Spacer so FAB doesn't cover last item
             item { Spacer(Modifier.height(8.dp)) }
         }
 
-        // Apply button
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        // Bottom buttons
+        Column(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = onStartConfirm,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = pairCount > 0
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Confirm Pairs Mode")
+            }
             Button(
                 onClick = onApply,
                 modifier = Modifier.fillMaxWidth(),
@@ -279,7 +326,6 @@ private fun ReviewStep(
 
 @Composable
 private fun PairRow(
-    index: Int,
     scan: ScanFile,
     frame: Frame?,
     isFirst: Boolean,
@@ -288,6 +334,10 @@ private fun PairRow(
     onMoveDown: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()) }
+    val scanCoilModel: Any = when (val s = scan.source) {
+        is ScanSource.TempFile -> s.file
+        is ScanSource.ContentUri -> s.uri
+    }
 
     Card(
         colors = CardDefaults.cardColors(
@@ -300,10 +350,21 @@ private fun PairRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Frame info (left side)
+            // Reference photo thumbnail
+            AsyncImage(
+                model = frame?.photoUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            // Frame info
             Column(modifier = Modifier.weight(1f)) {
                 if (frame != null) {
                     Text(
@@ -324,27 +385,16 @@ private fun PairRow(
                                 modifier = Modifier.size(10.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
-                            Text(
-                                "GPS",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            Text("GPS", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 } else {
-                    Text(
-                        "No frame",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Text("No frame", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
             }
 
-            // Scan filename (right side)
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.End
-            ) {
+            // Scan filename + reorder buttons
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f)) {
                 Text(
                     scan.name,
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
@@ -353,35 +403,175 @@ private fun PairRow(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-
-            // Reorder buttons
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(
-                    onClick = onMoveUp,
-                    enabled = !isFirst,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Move up",
-                        modifier = Modifier.size(18.dp)
-                    )
+                IconButton(onClick = onMoveUp, enabled = !isFirst, modifier = Modifier.size(28.dp)) {
+                    Icon(Icons.Default.KeyboardArrowUp, "Move up", modifier = Modifier.size(18.dp))
                 }
-                IconButton(
-                    onClick = onMoveDown,
-                    enabled = !isLast,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Move down",
-                        modifier = Modifier.size(18.dp)
-                    )
+                IconButton(onClick = onMoveDown, enabled = !isLast, modifier = Modifier.size(28.dp)) {
+                    Icon(Icons.Default.KeyboardArrowDown, "Move down", modifier = Modifier.size(18.dp))
                 }
+            }
+
+            // Scan thumbnail
+            AsyncImage(
+                model = scanCoilModel,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+// ─── Confirm pairs mode ──────────────────────────────────────────────────────
+
+@Composable
+private fun ConfirmModeContent(
+    uiState: ApplyMetadataUiState,
+    onConfirm: () -> Unit,
+    onSkip: () -> Unit
+) {
+    val cs = uiState.confirmState ?: return
+    val frame = uiState.frames.getOrNull(cs.frameIndex)
+    val scan = uiState.scanFiles.getOrNull(cs.scanIndex)
+
+    if (frame == null || scan == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "Session complete — ${cs.confirmedPairs.size} pair(s) confirmed.\nTap \"Apply ${cs.confirmedPairs.size}\" above.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
+    val scanCoilModel: Any = when (val s = scan.source) {
+        is ScanSource.TempFile -> s.file
+        is ScanSource.ContentUri -> s.uri
+    }
+    val dateFormat = remember { SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()) }
+
+    Column(Modifier.fillMaxSize()) {
+        // Side-by-side images
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            // Left: reference photo
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(Color.Black)
+            ) {
+                AsyncImage(
+                    model = frame.photoUri,
+                    contentDescription = "Frame ${frame.frameNumber}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                // Info overlay
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(8.dp)
+                        .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        "Frame #${frame.frameNumber}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    Text(
+                        dateFormat.format(Date(frame.capturedAt)),
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    if (frame.latitude != null && frame.longitude != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(10.dp),
+                                tint = Color.White
+                            )
+                            Text("GPS", color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+
+            // Divider
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+
+            // Right: scan image
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(Color.Black)
+            ) {
+                AsyncImage(
+                    model = scanCoilModel,
+                    contentDescription = scan.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                // Filename overlay
+                Text(
+                    text = scan.name,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
+                        .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // Action buttons
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onSkip,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Next scan")
+            }
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Pair!")
             }
         }
     }
 }
+
+// ─── Processing / Done ───────────────────────────────────────────────────────
 
 @Composable
 private fun ProcessingStep(uiState: ApplyMetadataUiState) {
@@ -399,10 +589,7 @@ private fun ProcessingStep(uiState: ApplyMetadataUiState) {
                 "Processing ${uiState.processedCount} of ${uiState.totalToProcess}…",
                 style = MaterialTheme.typography.bodyLarge
             )
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxWidth()
-            )
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
         }
     }
 }

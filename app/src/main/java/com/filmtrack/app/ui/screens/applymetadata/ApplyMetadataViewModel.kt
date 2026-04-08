@@ -40,6 +40,13 @@ data class ScanFile(
     val source: ScanSource
 )
 
+// frameIndex = which frame is on the left, scanIndex = which scan is on the right
+data class ConfirmState(
+    val frameIndex: Int = 0,
+    val scanIndex: Int = 0,
+    val confirmedPairs: List<Pair<Int, Int>> = emptyList() // (frameIdx, scanIdx)
+)
+
 enum class ApplyStep { PICK_SOURCE, REVIEW, PROCESSING, DONE }
 
 data class ApplyMetadataUiState(
@@ -52,7 +59,8 @@ data class ApplyMetadataUiState(
     val processedCount: Int = 0,
     val totalToProcess: Int = 0,
     val error: String? = null,
-    val outputFolderName: String? = null
+    val outputFolderName: String? = null,
+    val confirmState: ConfirmState? = null
 )
 
 @HiltViewModel
@@ -247,6 +255,49 @@ class ApplyMetadataViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun startConfirmMode() {
+        _uiState.update { it.copy(confirmState = ConfirmState()) }
+    }
+
+    /** Tick — this scan matches this frame. Both pointers advance. */
+    fun confirmPair() {
+        val state = _uiState.value
+        val cs = state.confirmState ?: return
+        val newPairs = cs.confirmedPairs + (cs.frameIndex to cs.scanIndex)
+        val nextFrame = cs.frameIndex + 1
+        val nextScan = cs.scanIndex + 1
+        if (nextFrame >= state.frames.size || nextScan >= state.scanFiles.size) {
+            applyConfirmedPairs(newPairs)
+        } else {
+            _uiState.update { it.copy(confirmState = cs.copy(frameIndex = nextFrame, scanIndex = nextScan, confirmedPairs = newPairs)) }
+        }
+    }
+
+    /** Cross — this scan is wrong for this frame. Only scan pointer advances. */
+    fun skipScan() {
+        val state = _uiState.value
+        val cs = state.confirmState ?: return
+        val nextScan = cs.scanIndex + 1
+        if (nextScan >= state.scanFiles.size) {
+            applyConfirmedPairs(cs.confirmedPairs)
+        } else {
+            _uiState.update { it.copy(confirmState = cs.copy(scanIndex = nextScan)) }
+        }
+    }
+
+    /** Apply the confirmed pairs from the session and return to REVIEW. */
+    fun applyConfirmedPairs(pairs: List<Pair<Int, Int>>? = null) {
+        val state = _uiState.value
+        val resolved = pairs ?: state.confirmState?.confirmedPairs ?: return
+        val newScans = resolved.map { (_, scanIdx) -> state.scanFiles[scanIdx] }
+        _uiState.update { it.copy(scanFiles = newScans, confirmState = null) }
+    }
+
+    /** Exit confirm mode without applying anything. */
+    fun exitConfirmMode() {
+        _uiState.update { it.copy(confirmState = null) }
     }
 
     fun resetToPickSource() {
