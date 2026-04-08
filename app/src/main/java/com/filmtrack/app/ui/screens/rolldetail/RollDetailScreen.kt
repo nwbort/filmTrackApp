@@ -37,7 +37,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -164,7 +164,7 @@ fun RollDetailScreen(
                                 )
                             }
                             IconButton(onClick = { onApplyMetadataClick(roll.id) }) {
-                                Icon(Icons.Default.Layers, "Apply Metadata to Scans")
+                                Icon(Icons.Default.PhotoLibrary, "Apply Metadata to Scans")
                             }
                             IconButton(onClick = { onEditClick(roll.id) }) {
                                 Icon(Icons.Default.Edit, "Edit Roll")
