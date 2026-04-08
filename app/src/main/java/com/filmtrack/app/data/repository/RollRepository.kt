@@ -21,11 +21,23 @@ class RollRepository @Inject constructor(
 
     suspend fun getLastUsedRoll(): Roll? = rollDao.getLastUsedRoll()
 
+    suspend fun getLastUsedIncompleteRoll(): Roll? = rollDao.getLastUsedIncompleteRoll()
+
     suspend fun createRoll(roll: Roll): Long = rollDao.insertRoll(roll)
 
     suspend fun updateRoll(roll: Roll) = rollDao.updateRoll(
         roll.copy(updatedAt = System.currentTimeMillis())
     )
+
+    suspend fun toggleRollComplete(roll: Roll) {
+        val now = System.currentTimeMillis()
+        val updated = if (roll.dateFinished == null) {
+            roll.copy(dateFinished = now, updatedAt = now)
+        } else {
+            roll.copy(dateFinished = null, updatedAt = now)
+        }
+        rollDao.updateRoll(updated)
+    }
 
     suspend fun deleteRoll(id: Long) = rollDao.deleteRollById(id)
 

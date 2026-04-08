@@ -22,6 +22,9 @@ interface RollDao {
     @Query("SELECT * FROM rolls ORDER BY updatedAt DESC LIMIT 1")
     suspend fun getLastUsedRoll(): Roll?
 
+    @Query("SELECT * FROM rolls WHERE dateFinished IS NULL ORDER BY updatedAt DESC LIMIT 1")
+    suspend fun getLastUsedIncompleteRoll(): Roll?
+
     @Insert
     suspend fun insertRoll(roll: Roll): Long
 
