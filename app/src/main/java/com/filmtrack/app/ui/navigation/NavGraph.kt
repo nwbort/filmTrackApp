@@ -94,16 +94,18 @@ fun FilmTrackNavGraph(
             CameraScreen(
                 onBackClick = { rollId ->
                     if (rollId != null) {
-                        navController.navigate(Routes.rollDetail(rollId)) {
+                        navController.navigate(Routes.ROLL_LIST) {
                             popUpTo(0) { inclusive = true }
                         }
+                        navController.navigate(Routes.rollDetail(rollId))
                     }
                 },
                 onPhotoCaptured = { rollId ->
                     if (rollId != null) {
-                        navController.navigate(Routes.rollDetail(rollId)) {
+                        navController.navigate(Routes.ROLL_LIST) {
                             popUpTo(0) { inclusive = true }
                         }
+                        navController.navigate(Routes.rollDetail(rollId))
                     }
                 },
                 isQuickCapture = true
