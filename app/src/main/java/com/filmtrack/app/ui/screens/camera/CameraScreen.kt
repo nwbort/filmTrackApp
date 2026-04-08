@@ -87,8 +87,21 @@ fun CameraScreen(
         .first { it.permission == Manifest.permission.CAMERA }
         .status.isGranted
 
+    val locationPermissionGranted = permissionsState.permissions
+        .any {
+            (it.permission == Manifest.permission.ACCESS_FINE_LOCATION ||
+                it.permission == Manifest.permission.ACCESS_COARSE_LOCATION) &&
+                it.status.isGranted
+        }
+
     LaunchedEffect(Unit) {
         permissionsState.launchMultiplePermissionRequest()
+    }
+
+    LaunchedEffect(locationPermissionGranted) {
+        if (locationPermissionGranted) {
+            viewModel.startLocationFetch()
+        }
     }
 
     if (!cameraPermissionGranted) {

@@ -69,12 +69,18 @@ class CameraViewModel @Inject constructor(
     private var resolvedRollId: Long = rollId
     private var prefetchedLocation: Pair<Double, Double>? = null
 
-    init {
-        // Start fetching location immediately so it's ready when the shutter is pressed
+    private var locationFetchStarted = false
+
+    fun startLocationFetch() {
+        if (locationFetchStarted) return
+        locationFetchStarted = true
         viewModelScope.launch {
             prefetchedLocation = getLocation()
             _uiState.update { it.copy(locationReady = true) }
         }
+    }
+
+    init {
         viewModelScope.launch {
             val roll = when {
                 isQuickCapture -> {
