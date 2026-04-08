@@ -23,7 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CameraRoll
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -149,7 +151,8 @@ fun RollListScreen(
                                 rollWithCount = rollWithCount,
                                 isActive = rollWithCount.roll.id == uiState.activeRollId,
                                 onClick = { onRollClick(rollWithCount.roll.id) },
-                                onDeleteClick = { rollToDelete = rollWithCount.roll.id }
+                                onDeleteClick = { rollToDelete = rollWithCount.roll.id },
+                                onToggleComplete = { viewModel.toggleRollComplete(rollWithCount.roll.id) }
                             )
                         }
                     }
@@ -164,9 +167,11 @@ private fun RollCard(
     rollWithCount: RollWithFrameCount,
     isActive: Boolean,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    onToggleComplete: () -> Unit
 ) {
     val roll = rollWithCount.roll
+    val isComplete = roll.dateFinished != null
     val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     val hasThumbnails = rollWithCount.thumbnailUris.isNotEmpty()
 
@@ -176,10 +181,11 @@ private fun RollCard(
             .animateContentSize()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (isActive)
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = when {
+                isActive -> MaterialTheme.colorScheme.primaryContainer
+                isComplete -> MaterialTheme.colorScheme.surfaceContainerLow
+                else -> MaterialTheme.colorScheme.surfaceContainerHigh
+            }
         ),
         border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
@@ -225,12 +231,24 @@ private fun RollCard(
                             )
                         }
                     }
-                    IconButton(onClick = onDeleteClick) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Row {
+                        IconButton(onClick = onToggleComplete) {
+                            Icon(
+                                if (isComplete) Icons.Default.CheckCircle else Icons.Outlined.CheckCircle,
+                                contentDescription = if (isComplete) "Mark as active" else "Mark as complete",
+                                tint = if (isComplete)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        IconButton(onClick = onDeleteClick) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
@@ -269,6 +287,13 @@ private fun RollCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (isComplete && roll.dateFinished != null) {
+                    Text(
+                        text = "Completed ${dateFormat.format(Date(roll.dateFinished))}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             // Filmstrip — edge-to-edge at bottom of card

@@ -31,11 +31,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -148,6 +150,17 @@ fun RollDetailScreen(
                     },
                     actions = {
                         uiState.roll?.let { roll ->
+                            val isComplete = roll.dateFinished != null
+                            IconButton(onClick = { viewModel.toggleComplete() }) {
+                                Icon(
+                                    if (isComplete) Icons.Default.CheckCircle else Icons.Outlined.CheckCircle,
+                                    contentDescription = if (isComplete) "Mark as active" else "Mark as complete",
+                                    tint = if (isComplete)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             IconButton(onClick = { onEditClick(roll.id) }) {
                                 Icon(Icons.Default.Edit, "Edit Roll")
                             }
@@ -283,6 +296,13 @@ private fun RollInfoHeader(roll: com.filmtrack.app.data.model.Roll, frameCount: 
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (roll.dateFinished != null) {
+                Text(
+                    "Completed ${dateFormat.format(Date(roll.dateFinished))}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

@@ -78,10 +78,12 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             val roll = when {
                 isQuickCapture -> {
-                    // Prefer the persisted active roll, fall back to last used, then create new
+                    // Prefer the persisted active roll, but only if it's incomplete
                     val activeId = activeRollStore.activeRollId
-                    if (activeId != -1L) repository.getRollById(activeId) else null
-                        ?: repository.getLastUsedRoll()
+                    val activeRoll = if (activeId != -1L) repository.getRollById(activeId) else null
+                    val candidate = if (activeRoll?.dateFinished == null) activeRoll else null
+                    candidate
+                        ?: repository.getLastUsedIncompleteRoll()
                         ?: createDefaultRoll()
                 }
                 else -> repository.getRollById(rollId)
@@ -97,7 +99,7 @@ class CameraViewModel @Inject constructor(
         }
         viewModelScope.launch {
             repository.getAllRolls().collect { rolls ->
-                _uiState.update { it.copy(allRolls = rolls) }
+                _uiState.update { it.copy(allRolls = rolls.filter { roll -> roll.dateFinished == null }) }
             }
         }
     }
