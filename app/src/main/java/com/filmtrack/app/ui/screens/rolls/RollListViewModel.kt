@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 data class RollWithFrameCount(
     val roll: Roll,
-    val frameCount: Int = 0
+    val frameCount: Int = 0,
+    val thumbnailUris: List<String> = emptyList()
 )
 
 data class RollListUiState(
@@ -34,7 +35,11 @@ class RollListViewModel @Inject constructor(
     val uiState: StateFlow<RollListUiState> = combine(
         repository.getAllRolls().map { rolls ->
             rolls.map { roll ->
-                RollWithFrameCount(roll = roll, frameCount = repository.getFrameCount(roll.id))
+                RollWithFrameCount(
+                    roll = roll,
+                    frameCount = repository.getFrameCount(roll.id),
+                    thumbnailUris = repository.getFirstPhotoUris(roll.id, limit = 6)
+                )
             }
         },
         activeRollStore.activeRollIdFlow

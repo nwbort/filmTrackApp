@@ -22,6 +22,9 @@ interface FrameDao {
     @Query("SELECT MAX(frameNumber) FROM frames WHERE rollId = :rollId")
     suspend fun getMaxFrameNumber(rollId: Long): Int?
 
+    @Query("SELECT photoUri FROM frames WHERE rollId = :rollId ORDER BY frameNumber ASC LIMIT :limit")
+    suspend fun getFirstPhotoUris(rollId: Long, limit: Int): List<String>
+
     @Insert
     suspend fun insertFrame(frame: Frame): Long
 

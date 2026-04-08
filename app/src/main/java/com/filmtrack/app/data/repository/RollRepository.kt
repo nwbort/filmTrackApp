@@ -33,6 +33,9 @@ class RollRepository @Inject constructor(
 
     suspend fun getFrameCount(rollId: Long): Int = frameDao.getFrameCount(rollId)
 
+    suspend fun getFirstPhotoUris(rollId: Long, limit: Int = 6): List<String> =
+        frameDao.getFirstPhotoUris(rollId, limit)
+
     suspend fun getNextFrameNumber(rollId: Long): Int {
         val max = frameDao.getMaxFrameNumber(rollId)
         return (max ?: 0) + 1
