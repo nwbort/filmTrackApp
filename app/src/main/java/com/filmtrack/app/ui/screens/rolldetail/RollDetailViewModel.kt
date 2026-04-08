@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.filmtrack.app.data.model.Frame
 import com.filmtrack.app.data.model.Roll
 import com.filmtrack.app.data.repository.RollRepository
+import com.filmtrack.app.data.store.ActiveRollStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ data class RollDetailUiState(
 @HiltViewModel
 class RollDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: RollRepository
+    private val repository: RollRepository,
+    private val activeRollStore: ActiveRollStore
 ) : ViewModel() {
 
     private val rollId: Long = savedStateHandle["rollId"] ?: -1L
@@ -60,7 +62,12 @@ class RollDetailViewModel @Inject constructor(
     fun toggleComplete() {
         viewModelScope.launch {
             uiState.value.roll?.let { roll ->
+                val isBeingCompleted = roll.dateFinished == null
                 repository.toggleRollComplete(roll)
+                if (isBeingCompleted && roll.id == activeRollStore.activeRollId) {
+                    val fallback = repository.getLastUsedIncompleteRoll()
+                    activeRollStore.setActiveRoll(fallback?.id ?: -1L)
+                }
             }
         }
     }

@@ -60,7 +60,12 @@ class RollListViewModel @Inject constructor(
     fun toggleRollComplete(rollId: Long) {
         viewModelScope.launch {
             repository.getRollById(rollId)?.let { roll ->
+                val isBeingCompleted = roll.dateFinished == null
                 repository.toggleRollComplete(roll)
+                if (isBeingCompleted && rollId == activeRollStore.activeRollId) {
+                    val fallback = repository.getLastUsedIncompleteRoll()
+                    activeRollStore.setActiveRoll(fallback?.id ?: -1L)
+                }
             }
         }
     }

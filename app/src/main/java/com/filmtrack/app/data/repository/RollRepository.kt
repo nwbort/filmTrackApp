@@ -21,6 +21,8 @@ class RollRepository @Inject constructor(
 
     suspend fun getLastUsedRoll(): Roll? = rollDao.getLastUsedRoll()
 
+    suspend fun getLastUsedIncompleteRoll(): Roll? = rollDao.getLastUsedIncompleteRoll()
+
     suspend fun createRoll(roll: Roll): Long = rollDao.insertRoll(roll)
 
     suspend fun updateRoll(roll: Roll) = rollDao.updateRoll(
