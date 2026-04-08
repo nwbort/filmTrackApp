@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.filmtrack.app.data.model.Frame
 import com.filmtrack.app.data.model.Roll
 import com.filmtrack.app.data.repository.RollRepository
+import com.filmtrack.app.data.store.ActiveRollStore
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -21,6 +22,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
@@ -43,13 +45,16 @@ data class CameraUiState(
     val roll: Roll? = null,
     val nextFrameNumber: Int = 1,
     val captureState: CaptureState = CaptureState.Idle,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val allRolls: List<Roll> = emptyList(),
+    val showRollPicker: Boolean = false
 )
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: RollRepository,
+    private val activeRollStore: ActiveRollStore,
     private val locationClient: FusedLocationProviderClient,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -64,19 +69,28 @@ class CameraViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val roll = if (isQuickCapture) {
-                repository.getLastUsedRoll() ?: createDefaultRoll()
-            } else {
-                repository.getRollById(rollId)
+            val roll = when {
+                isQuickCapture -> {
+                    // Prefer the persisted active roll, fall back to last used, then create new
+                    val activeId = activeRollStore.activeRollId
+                    if (activeId != -1L) repository.getRollById(activeId) else null
+                        ?: repository.getLastUsedRoll()
+                        ?: createDefaultRoll()
+                }
+                else -> repository.getRollById(rollId)
             }
             roll?.let {
                 resolvedRollId = it.id
+                activeRollStore.setActiveRoll(it.id)
                 val nextFrame = repository.getNextFrameNumber(it.id)
-                _uiState.value = CameraUiState(
-                    roll = it,
-                    nextFrameNumber = nextFrame,
-                    isLoading = false
-                )
+                _uiState.update { state ->
+                    state.copy(roll = roll, nextFrameNumber = nextFrame, isLoading = false)
+                }
+            }
+        }
+        viewModelScope.launch {
+            repository.getAllRolls().collect { rolls ->
+                _uiState.update { it.copy(allRolls = rolls) }
             }
         }
     }
@@ -86,6 +100,23 @@ class CameraViewModel @Inject constructor(
         val name = "Roll - ${dateFormat.format(Date())}"
         val id = repository.createRoll(Roll(name = name))
         return repository.getRollById(id)!!
+    }
+
+    fun showRollPicker() {
+        _uiState.update { it.copy(showRollPicker = true) }
+    }
+
+    fun hideRollPicker() {
+        _uiState.update { it.copy(showRollPicker = false) }
+    }
+
+    fun selectRoll(roll: Roll) {
+        viewModelScope.launch {
+            resolvedRollId = roll.id
+            activeRollStore.setActiveRoll(roll.id)
+            val nextFrame = repository.getNextFrameNumber(roll.id)
+            _uiState.update { it.copy(roll = roll, nextFrameNumber = nextFrame, showRollPicker = false) }
+        }
     }
 
     fun capturePhoto(imageCapture: ImageCapture, executor: Executor) {
@@ -99,13 +130,9 @@ class CameraViewModel @Inject constructor(
                 val frameNumber = _uiState.value.nextFrameNumber
                 val timestamp = System.currentTimeMillis()
 
-                // Get location
                 val location = getLocation()
-
-                // Save to MediaStore
                 val photoUri = saveToMediaStore(imageCapture, executor, roll.name, frameNumber)
 
-                // Save frame to database
                 repository.addFrame(
                     Frame(
                         rollId = resolvedRollId,
@@ -143,7 +170,6 @@ class CameraViewModel @Inject constructor(
             ).await()
             location?.let { Pair(it.latitude, it.longitude) }
         } catch (_: Exception) {
-            // Fall back to last location
             try {
                 val location = locationClient.lastLocation.await()
                 location?.let { Pair(it.latitude, it.longitude) }

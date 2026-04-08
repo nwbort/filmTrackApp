@@ -29,7 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -137,11 +137,9 @@ fun RollDetailScreen(
         },
         floatingActionButton = {
             uiState.roll?.let { roll ->
-                ExtendedFloatingActionButton(
-                    onClick = { onCaptureClick(roll.id) },
-                    icon = { Icon(Icons.Default.CameraAlt, "Capture") },
-                    text = { Text("Capture Frame ${uiState.frames.size + 1}") }
-                )
+                FloatingActionButton(onClick = { onCaptureClick(roll.id) }) {
+                    Icon(Icons.Default.CameraAlt, "Capture")
+                }
             }
         }
     ) { padding ->
