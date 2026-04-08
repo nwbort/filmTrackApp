@@ -26,7 +26,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.ImageProvider
 import androidx.glance.Image
-import androidx.glance.layout.ContentScale
 import androidx.glance.appwidget.cornerRadius
 import com.filmtrack.app.R
 import androidx.compose.ui.unit.dp

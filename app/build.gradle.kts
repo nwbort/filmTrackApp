@@ -85,6 +85,9 @@ dependencies {
     // Location
     implementation(libs.play.services.location)
 
+    // Coroutines Play Services
+    implementation(libs.kotlinx.coroutines.play.services)
+
     // Glance Widget
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
