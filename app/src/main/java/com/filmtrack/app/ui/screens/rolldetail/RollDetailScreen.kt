@@ -1,6 +1,9 @@
 package com.filmtrack.app.ui.screens.rolldetail
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -30,6 +33,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -51,6 +55,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -90,6 +95,12 @@ fun RollDetailScreen(
     var frameToDelete by remember { mutableStateOf<Long?>(null) }
     var frameToEdit by remember { mutableStateOf<Frame?>(null) }
     var galleryInitialIndex by remember { mutableStateOf<Int?>(null) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia()
+    ) { uris ->
+        if (uris.isNotEmpty()) viewModel.importFromCameraRoll(uris)
+    }
 
     if (frameToDelete != null) {
         AlertDialog(
@@ -175,8 +186,31 @@ fun RollDetailScreen(
             },
             floatingActionButton = {
                 uiState.roll?.let { roll ->
-                    FloatingActionButton(onClick = { onCaptureClick(roll.id) }) {
-                        Icon(Icons.Default.CameraAlt, "Capture")
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        SmallFloatingActionButton(
+                            onClick = {
+                                if (!uiState.isImporting) {
+                                    importLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                }
+                            }
+                        ) {
+                            if (uiState.isImporting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(Icons.Default.AddPhotoAlternate, "Import from camera roll")
+                            }
+                        }
+                        FloatingActionButton(onClick = { onCaptureClick(roll.id) }) {
+                            Icon(Icons.Default.CameraAlt, "Capture")
+                        }
                     }
                 }
             }
