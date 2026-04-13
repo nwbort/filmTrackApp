@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -68,6 +69,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -87,9 +91,22 @@ fun RollDetailScreen(
     viewModel: RollDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isExporting by viewModel.isExporting.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var frameToDelete by remember { mutableStateOf<Long?>(null) }
     var frameToEdit by remember { mutableStateOf<Frame?>(null) }
     var galleryInitialIndex by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.exportReady.collect { uri ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, "Export roll"))
+        }
+    }
 
     if (frameToDelete != null) {
         AlertDialog(
@@ -162,6 +179,16 @@ fun RollDetailScreen(
                                     else
                                         MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                            IconButton(
+                                onClick = { viewModel.exportRoll() },
+                                enabled = !isExporting
+                            ) {
+                                if (isExporting) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                } else {
+                                    Icon(Icons.Default.Share, contentDescription = "Export roll")
+                                }
                             }
                             IconButton(onClick = { onApplyMetadataClick(roll.id) }) {
                                 Icon(Icons.Default.PhotoLibrary, "Apply Metadata to Scans")
