@@ -31,56 +31,37 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-/* ── top bar ──────────────────────────────────────────────────────────────── */
+/* ── top bar ── */
 .topbar {
   border-bottom: 1px solid var(--border);
   padding: 14px 0;
-  position: sticky;
-  top: 0;
+  position: sticky; top: 0;
   background: var(--bg);
   z-index: 10;
 }
 .topbar-inner { display: flex; align-items: center; gap: 10px; }
-.logo {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
+.logo { font-size: 17px; font-weight: 700; letter-spacing: .06em; color: var(--accent); text-transform: uppercase; }
 .topbar-sub { color: var(--text2); font-size: 13px; }
 .topbar-sep { color: var(--border); }
 
-/* ── roll header ──────────────────────────────────────────────────────────── */
+/* ── roll header ── */
 .roll-header {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px 20px;
   margin: 20px 0 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
 }
 .roll-name { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-.roll-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  color: var(--text2);
-  font-size: 13px;
-}
-.match-count {
-  text-align: right;
-  flex-shrink: 0;
-}
+.roll-chips { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text2); font-size: 13px; }
+.match-count { text-align: right; flex-shrink: 0; }
 .match-count .num { font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1; }
 .match-count .lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
-/* ── upload zone ──────────────────────────────────────────────────────────── */
+/* ── upload zone ── */
 .upload-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
@@ -98,180 +79,107 @@ a:hover { text-decoration: underline; }
 .upload-hint { color: var(--text2); font-size: 11px; margin-top: 8px; }
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s, border-color .15s;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-size: 13px; cursor: pointer;
+  font-family: inherit; transition: background .15s, border-color .15s;
 }
 .btn:hover { background: var(--surface); border-color: var(--accent); }
-.btn-accent {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #111;
-  font-weight: 600;
-}
+.btn-accent { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 600; }
 .btn-accent:hover { opacity: .88; background: var(--accent); }
 
-/* ── warning banner ───────────────────────────────────────────────────────── */
+/* ── warning ── */
 .warning {
-  background: rgba(224,82,82,.1);
-  border: 1px solid var(--red);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  color: var(--red);
-  margin-bottom: 14px;
-  font-size: 13px;
+  background: rgba(224,82,82,.1); border: 1px solid var(--red);
+  border-radius: var(--radius); padding: 10px 16px;
+  color: var(--red); margin-bottom: 14px; font-size: 13px;
 }
 
-/* ── frames table ─────────────────────────────────────────────────────────── */
-.frames-wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow-x: auto;
-  margin-bottom: 48px;
-}
+/* ── frames table ── */
+.frames-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 48px; }
 table { width: 100%; border-collapse: collapse; }
 thead th {
-  background: var(--surface);
-  padding: 10px 14px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--text2);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+  background: var(--surface); padding: 10px 14px;
+  text-align: left; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--text2);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
 tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
 tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(255,255,255,.03); }
-tbody tr.drag-over-row {
-  background: rgba(200,168,75,.08);
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
+tbody tr:hover { background: rgba(255,255,255,.025); }
+tbody tr.drag-over-row { background: rgba(200,168,75,.08); outline: 2px solid var(--accent); outline-offset: -2px; }
 td { padding: 10px 14px; vertical-align: middle; }
 
 .td-num { width: 40px; text-align: center; font-weight: 700; font-size: 16px; color: var(--accent); }
 
-.td-scan { width: 116px; min-width: 116px; }
-
-.thumb-wrap {
-  position: relative;
-  width: 104px;
-  height: 78px;
-  cursor: grab;
-}
-.thumb-wrap:active { cursor: grabbing; }
-.thumb-wrap img {
-  width: 104px;
-  height: 78px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  display: block;
+/* reference thumb (phone capture) */
+.td-ref { width: 116px; min-width: 116px; }
+.ref-img {
+  width: 104px; height: 78px; object-fit: cover;
+  border-radius: 4px; border: 1px solid var(--border); display: block;
   cursor: zoom-in;
 }
-.thumb-filename {
-  font-size: 10px;
-  color: var(--text2);
-  margin-top: 3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 104px;
+.ref-label { font-size: 10px; color: var(--text2); margin-top: 3px; text-align: center; letter-spacing: .04em; }
+
+/* scan slot */
+.td-scan { width: 116px; min-width: 116px; }
+.thumb-wrap { position: relative; width: 104px; cursor: grab; }
+.thumb-wrap:active { cursor: grabbing; }
+.thumb-wrap img {
+  width: 104px; height: 78px; object-fit: cover;
+  border-radius: 4px; border: 1px solid var(--border);
+  display: block; cursor: zoom-in;
 }
+.thumb-filename { font-size: 10px; color: var(--text2); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 104px; }
 .empty-slot {
-  width: 104px;
-  height: 78px;
-  border: 1px dashed var(--border);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--border);
-  font-size: 24px;
-  cursor: pointer;
+  width: 104px; height: 78px; border: 1px dashed var(--border);
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  color: var(--border); font-size: 24px; cursor: pointer;
   transition: border-color .15s, color .15s;
 }
 .empty-slot:hover { border-color: var(--accent); color: var(--accent); }
 
-.td-time { white-space: nowrap; }
 .td-time .date { color: var(--text); }
 .td-time .time { color: var(--text2); font-size: 12px; }
+.td-loc a { font-size: 12px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.td-note { max-width: 200px; color: var(--text2); font-size: 13px; }
+.dash { color: var(--border); }
 
-.td-loc { white-space: nowrap; }
-.td-loc a { font-size: 12px; display: flex; align-items: center; gap: 4px; }
-.td-loc .dash { color: var(--border); }
-
-.td-note { max-width: 220px; color: var(--text2); font-size: 13px; }
-.td-note .dash { color: var(--border); }
-
-/* ── landing (no URL data) ────────────────────────────────────────────────── */
+/* ── landing ── */
 .landing {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 65vh;
-  text-align: center;
-  padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 65vh; text-align: center; padding: 40px 20px;
 }
-.landing-logo { font-size: 42px; margin-bottom: 20px; }
+.landing-icon { font-size: 44px; margin-bottom: 18px; }
 .landing h1 { font-size: 26px; font-weight: 700; color: var(--accent); margin-bottom: 12px; }
 .landing p { color: var(--text2); max-width: 500px; line-height: 1.75; margin-bottom: 10px; }
-.landing .step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 20px;
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--text2);
-  text-align: left;
-  max-width: 420px;
-  width: 100%;
-}
-.landing .step strong { color: var(--text); }
 
-/* ── lightbox ─────────────────────────────────────────────────────────────── */
+.file-drop {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 32px 28px; margin-top: 20px; cursor: pointer;
+  transition: border-color .2s, background .2s; text-align: center; width: 100%; max-width: 420px;
+}
+.file-drop:hover, .file-drop.drag-over { border-color: var(--accent); background: rgba(200,168,75,.05); }
+.file-drop p { color: var(--text2); font-size: 13px; margin-bottom: 12px; }
+
+.steps { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 420px; }
+.step {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px;
+  font-size: 13px; color: var(--text2); text-align: left;
+}
+.step strong { color: var(--text); }
+
+/* ── lightbox ── */
 .lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.93);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  cursor: zoom-out;
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.93); z-index: 1000;
+  align-items: center; justify-content: center; cursor: zoom-out;
 }
 .lightbox.open { display: flex; }
-.lightbox img {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 4px;
-  cursor: default;
-}
-.lightbox-close {
-  position: absolute;
-  top: 16px;
-  right: 22px;
-  font-size: 26px;
-  color: #fff;
-  cursor: pointer;
-  line-height: 1;
-  opacity: .7;
-}
+.lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 4px; cursor: default; }
+.lightbox-close { position: absolute; top: 16px; right: 22px; font-size: 26px; color: #fff; cursor: pointer; opacity: .7; }
 .lightbox-close:hover { opacity: 1; }
 </style>
 </head>
@@ -287,165 +195,150 @@ td { padding: 10px 14px; vertical-align: middle; }
 
 <div class="container" id="app"></div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <span class="lightbox-close" onclick="closeLightbox()">✕</span>
   <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()">
 </div>
 
-<!-- Hidden global file input for bulk upload -->
-<input type="file" id="fileInput" multiple accept="image/*"
-       style="display:none" onchange="handleFiles(this.files)">
+<!-- bulk scan upload (shown on roll view) -->
+<input type="file" id="scanInput" multiple accept="image/*"
+       style="display:none" onchange="handleScans(this.files)">
+<!-- export file picker (shown on landing) -->
+<input type="file" id="exportInput" accept=".json,application/json,application/octet-stream"
+       style="display:none" onchange="handleExportFile(this.files[0])">
 
 <script>
 'use strict';
 
-// ── State ──────────────────────────────────────────────────────────────────────
-let rollData    = null;   // { v, roll, frames[] }
-let photos      = [];     // [{ file, url, name }]  sorted by filename
-let assignments = [];     // assignments[frameIdx] = photoIdx | null
-let dragSrc     = null;   // frameIdx being dragged
+let rollData    = null;  // parsed { v, roll, frames[] }
+let photos      = [];    // [{ url, name }]  — user's scans
+let assignments = [];    // assignments[frameIdx] = photoIdx | null
+let dragSrc     = null;
 
-// ── Boot ───────────────────────────────────────────────────────────────────────
+// ── boot ──────────────────────────────────────────────────────────────────────
 (async function init() {
-  const params  = new URLSearchParams(location.search);
-  const encoded = params.get('d');
+  const encoded = new URLSearchParams(location.search).get('d');
   if (!encoded) { renderLanding(); return; }
   try {
-    const json = await decode(encoded);
-    rollData    = JSON.parse(json);
+    rollData    = JSON.parse(await decodeUrl(encoded));
     assignments = new Array(rollData.frames.length).fill(null);
     render();
   } catch (e) {
     console.error(e);
-    renderError('Could not read roll data from this URL. Make sure you opened the exact link generated by the FilmTrack app.');
+    renderError('Could not read roll data from this URL. Make sure you opened the exact link from the FilmTrack app.');
   }
 })();
 
-// ── Decompress base64url(zlib) → string ───────────────────────────────────────
-async function decode(encoded) {
-  // base64url → standard base64 + padding
+// ── URL decode (base64url → zlib inflate → JSON string) ───────────────────────
+async function decodeUrl(encoded) {
   const b64    = encoded.replace(/-/g, '+').replace(/_/g, '/');
   const padded = b64 + '=='.slice(0, (4 - b64.length % 4) % 4);
   const bin    = atob(padded);
   const bytes  = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
 
-  // decompress zlib (deflate with header — matches Java Deflater nowrap=false)
-  const ds     = new DecompressionStream('deflate');
-  const writer = ds.writable.getWriter();
-  writer.write(bytes);
-  writer.close();
+  const ds = new DecompressionStream('deflate');
+  const w  = ds.writable.getWriter();
+  w.write(bytes); w.close();
 
   const chunks = [];
-  const reader = ds.readable.getReader();
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-  }
+  const r = ds.readable.getReader();
+  for (;;) { const { done, value } = await r.read(); if (done) break; chunks.push(value); }
   const total = chunks.reduce((s, c) => s + c.length, 0);
   const out   = new Uint8Array(total);
-  let off = 0;
-  for (const c of chunks) { out.set(c, off); off += c.length; }
+  let off = 0; for (const c of chunks) { out.set(c, off); off += c.length; }
   return new TextDecoder().decode(out);
 }
 
-// ── File handling ──────────────────────────────────────────────────────────────
-function handleFiles(fileList) {
+// ── export file loading ────────────────────────────────────────────────────────
+function handleExportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      rollData    = JSON.parse(e.target.result);
+      assignments = new Array(rollData.frames.length).fill(null);
+      render();
+    } catch {
+      renderError('Could not parse the export file. Make sure it was exported from the FilmTrack app.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── scan file handling ─────────────────────────────────────────────────────────
+function handleScans(fileList) {
   const added = Array.from(fileList)
     .filter(f => f.type.startsWith('image/'))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-  const startIdx = photos.length;
-  added.forEach(f => photos.push({ file: f, url: URL.createObjectURL(f), name: f.name }));
+  const start = photos.length;
+  added.forEach(f => photos.push({ url: URL.createObjectURL(f), name: f.name }));
 
-  // Auto-assign newly added photos into empty frame slots in order
-  let pi = startIdx;
+  // auto-fill empty slots in frame order
+  let pi = start;
   for (let fi = 0; fi < assignments.length && pi < photos.length; fi++) {
-    if (assignments[fi] === null) { assignments[fi] = pi++; }
+    if (assignments[fi] === null) assignments[fi] = pi++;
   }
-
   render();
 }
 
-// ── Drag & drop between frame rows ────────────────────────────────────────────
+// ── drag-and-drop between rows ─────────────────────────────────────────────────
 function rowDragStart(e, fi) {
   if (assignments[fi] === null) { e.preventDefault(); return; }
-  dragSrc = fi;
-  e.dataTransfer.effectAllowed = 'move';
+  dragSrc = fi; e.dataTransfer.effectAllowed = 'move';
 }
 function rowDragOver(e, fi) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  clearDragHighlights();
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  clearHighlights();
   document.getElementById('row-' + fi)?.classList.add('drag-over-row');
 }
 function rowDrop(e, fi) {
-  e.preventDefault();
-  clearDragHighlights();
+  e.preventDefault(); clearHighlights();
   if (dragSrc === null || dragSrc === fi) { dragSrc = null; return; }
-  // swap
   [assignments[fi], assignments[dragSrc]] = [assignments[dragSrc], assignments[fi]];
-  dragSrc = null;
-  renderTable();
+  dragSrc = null; renderTable();
 }
-function rowDragEnd() { dragSrc = null; clearDragHighlights(); }
-function clearDragHighlights() {
-  document.querySelectorAll('.drag-over-row').forEach(r => r.classList.remove('drag-over-row'));
-}
+function rowDragEnd() { dragSrc = null; clearHighlights(); }
+function clearHighlights() { document.querySelectorAll('.drag-over-row').forEach(r => r.classList.remove('drag-over-row')); }
 
-// Allow dropping files from OS onto individual slots (fills that slot)
+// drop a single file from the OS onto a specific slot
 function slotDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
 function slotDrop(e, fi) {
-  e.preventDefault();
-  e.stopPropagation();
-  if (e.dataTransfer.files.length) {
-    const f = e.dataTransfer.files[0];
-    if (!f.type.startsWith('image/')) return;
-    const pi = photos.length;
-    photos.push({ file: f, url: URL.createObjectURL(f), name: f.name });
-    assignments[fi] = pi;
-    renderTable();
-  }
+  e.preventDefault(); e.stopPropagation();
+  const f = e.dataTransfer.files[0];
+  if (!f || !f.type.startsWith('image/')) return;
+  const pi = photos.length;
+  photos.push({ url: URL.createObjectURL(f), name: f.name });
+  assignments[fi] = pi; renderTable();
 }
-
-// Click empty slot → file picker for that one slot
 function pickForSlot(fi) {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*';
   inp.onchange = () => {
     if (!inp.files.length) return;
-    const f  = inp.files[0];
+    const f = inp.files[0];
     const pi = photos.length;
-    photos.push({ file: f, url: URL.createObjectURL(f), name: f.name });
-    assignments[fi] = pi;
-    renderTable();
+    photos.push({ url: URL.createObjectURL(f), name: f.name });
+    assignments[fi] = pi; renderTable();
   };
   inp.click();
 }
 
-// ── Upload zone wiring ─────────────────────────────────────────────────────────
-function wireUploadZone() {
-  const zone = document.getElementById('uploadZone');
+// ── scan upload zone wiring ────────────────────────────────────────────────────
+function wireScanZone() {
+  const zone = document.getElementById('scanZone');
   if (!zone) return;
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-  });
-  zone.addEventListener('click', e => {
-    if (e.target.closest('button')) return; // let button handle its own click
-    document.getElementById('fileInput').click();
-  });
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleScans(e.dataTransfer.files); });
+  zone.addEventListener('click', e => { if (!e.target.closest('button')) document.getElementById('scanInput').click(); });
 }
 
-// ── Lightbox ───────────────────────────────────────────────────────────────────
-function openLightbox(url, name) {
-  const img = document.getElementById('lightboxImg');
-  img.src = url; img.alt = name;
+// ── lightbox ───────────────────────────────────────────────────────────────────
+function openLightbox(url, alt) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightboxImg').alt = alt;
   document.getElementById('lightbox').classList.add('open');
 }
 function closeLightbox() {
@@ -454,38 +347,30 @@ function closeLightbox() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-// ── Format helpers ─────────────────────────────────────────────────────────────
-function fmtDate(ts) {
-  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-function fmtTime(ts) {
-  return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-}
-function mapsUrl(lat, lng) {
-  return 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
-}
+// ── format helpers ─────────────────────────────────────────────────────────────
+function fmtDate(ts) { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); }
+function mapsUrl(lat, lng) { return 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng; }
 function esc(s) {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── Render: full page ──────────────────────────────────────────────────────────
+// ── render: full page ──────────────────────────────────────────────────────────
 function render() {
   if (!rollData) { renderLanding(); return; }
 
-  const roll   = rollData.roll;
-  const frames = rollData.frames;
-  const matched = assignments.filter(a => a !== null).length;
-  const mismatch = photos.length > 0 && photos.length !== frames.length;
+  const roll      = rollData.roll;
+  const frames    = rollData.frames;
+  const matched   = assignments.filter(a => a !== null).length;
+  const hasThumbs = frames.some(f => f.thumb);
+  const mismatch  = photos.length > 0 && photos.length !== frames.length;
 
   const chipDate = ts => new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
   let chips = [];
-  if (roll.filmStock) chips.push('🎞\u2006' + esc(roll.filmStock));
-  if (roll.camera)    chips.push('📷\u2006' + esc(roll.camera));
-  if (roll.iso)       chips.push('ISO\u00a0' + esc(roll.iso));
-  if (roll.dateStarted) chips.push('📅\u2006Started\u00a0' + chipDate(roll.dateStarted));
+  if (roll.filmStock)    chips.push('🎞\u2006' + esc(roll.filmStock));
+  if (roll.camera)       chips.push('📷\u2006' + esc(roll.camera));
+  if (roll.iso)          chips.push('ISO\u00a0' + esc(roll.iso));
+  if (roll.dateStarted)  chips.push('📅\u2006Started\u00a0' + chipDate(roll.dateStarted));
   if (roll.dateFinished) chips.push('✅\u2006Finished\u00a0' + chipDate(roll.dateFinished));
 
   document.getElementById('app').innerHTML = `
@@ -500,18 +385,11 @@ function render() {
       </div>
     </div>
 
-    ${mismatch ? `<div class="warning">
-      ⚠ ${photos.length} photo${photos.length !== 1 ? 's' : ''} uploaded but this roll has
-      ${frames.length} frame${frames.length !== 1 ? 's' : ''} — auto-order may not be exact.
-      Drag rows to re-assign.
-    </div>` : ''}
+    ${mismatch ? `<div class="warning">⚠ ${photos.length} photo${photos.length !== 1 ? 's' : ''} uploaded but this roll has ${frames.length} frame${frames.length !== 1 ? 's' : ''} — auto-order may be off. Drag rows to reassign.</div>` : ''}
 
-    <div class="upload-zone" id="uploadZone">
-      <p>${photos.length > 0
-        ? `${photos.length} scan${photos.length !== 1 ? 's' : ''} loaded — drop more to add, or drag rows to reorder`
-        : 'Drop your scanned photos here — they'll be matched to frames by filename order'}</p>
-      <button class="btn btn-accent"
-              onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+    <div class="upload-zone" id="scanZone">
+      <p>${photos.length > 0 ? `${photos.length} scan${photos.length !== 1 ? 's' : ''} loaded — drop more to add, or drag rows to reorder` : 'Drop your developed scans here — matched to frames by filename order'}</p>
+      <button class="btn btn-accent" onclick="event.stopPropagation(); document.getElementById('scanInput').click()">
         📁 ${photos.length > 0 ? 'Add More Scans' : 'Browse Scans'}
       </button>
       <p class="upload-hint">Photos never leave your device · drag thumbnails between rows to reorder</p>
@@ -522,7 +400,8 @@ function render() {
         <thead>
           <tr>
             <th>#</th>
-            <th>Scan</th>
+            ${hasThumbs ? '<th>Reference</th>' : ''}
+            <th>Your Scan</th>
             <th>Date / Time</th>
             <th>Location</th>
             <th>Notes</th>
@@ -533,15 +412,16 @@ function render() {
     </div>
   `;
 
-  wireUploadZone();
+  wireScanZone();
   renderTable();
 }
 
-// ── Render: just the table body (after drag/assign changes) ───────────────────
+// ── render: just the table body ────────────────────────────────────────────────
 function renderTable() {
   if (!rollData) return;
-  const frames  = rollData.frames;
-  const matched = assignments.filter(a => a !== null).length;
+  const frames    = rollData.frames;
+  const hasThumbs = frames.some(f => f.thumb);
+  const matched   = assignments.filter(a => a !== null).length;
 
   const numEl = document.getElementById('matchNum');
   if (numEl) numEl.textContent = matched + '/' + frames.length;
@@ -553,72 +433,97 @@ function renderTable() {
     const pi    = assignments[fi];
     const photo = pi !== null ? photos[pi] : null;
 
-    const scanCell = photo ? `
-      <div class="thumb-wrap"
-           draggable="true"
-           ondragstart="rowDragStart(event,${fi})"
-           ondragover="rowDragOver(event,${fi})"
-           ondrop="rowDrop(event,${fi})"
-           ondragend="rowDragEnd()">
-        <img src="${esc(photo.url)}" alt="${esc(photo.name)}"
-             title="${esc(photo.name)}"
-             onclick="openLightbox('${esc(photo.url)}','${esc(photo.name)}')">
-      </div>
-      <div class="thumb-filename" title="${esc(photo.name)}">${esc(photo.name)}</div>
-    ` : `
-      <div class="empty-slot"
-           ondragover="slotDragOver(event)"
-           ondrop="slotDrop(event,${fi})"
-           onclick="pickForSlot(${fi})"
-           title="Click or drop a photo here">＋</div>
-    `;
+    // reference thumb column (phone capture)
+    const refCell = hasThumbs ? (frame.thumb
+      ? `<td class="td-ref">
+           <img class="ref-img" src="${esc(frame.thumb)}" alt="Reference #${frame.n}"
+                title="Phone capture — tap to enlarge"
+                onclick="openLightbox('${esc(frame.thumb)}','Reference frame ${frame.n}')">
+           <div class="ref-label">REFERENCE</div>
+         </td>`
+      : `<td class="td-ref"><div class="dash" style="padding:4px">—</div></td>`)
+      : '';
 
-    const locCell = (frame.lat != null && frame.lng != null) ? `
-      <a href="${esc(mapsUrl(frame.lat, frame.lng))}" target="_blank" rel="noopener noreferrer">
-        📍 ${frame.lat.toFixed(4)}, ${frame.lng.toFixed(4)}
-      </a>
-    ` : `<span class="dash">—</span>`;
+    // user's scan column
+    const scanCell = photo
+      ? `<div class="thumb-wrap"
+              draggable="true"
+              ondragstart="rowDragStart(event,${fi})"
+              ondragover="rowDragOver(event,${fi})"
+              ondrop="rowDrop(event,${fi})"
+              ondragend="rowDragEnd()">
+           <img src="${esc(photo.url)}" alt="${esc(photo.name)}" title="${esc(photo.name)}"
+                onclick="openLightbox('${esc(photo.url)}','${esc(photo.name)}')">
+         </div>
+         <div class="thumb-filename" title="${esc(photo.name)}">${esc(photo.name)}</div>`
+      : `<div class="empty-slot"
+              ondragover="slotDragOver(event)"
+              ondrop="slotDrop(event,${fi})"
+              onclick="pickForSlot(${fi})"
+              title="Click or drop a scan here">＋</div>`;
 
-    const noteCell = frame.note
-      ? `<span title="${esc(frame.note)}">${esc(frame.note)}</span>`
+    const locCell = (frame.lat != null && frame.lng != null)
+      ? `<a href="${esc(mapsUrl(frame.lat, frame.lng))}" target="_blank" rel="noopener noreferrer">📍 ${frame.lat.toFixed(4)}, ${frame.lng.toFixed(4)}</a>`
       : `<span class="dash">—</span>`;
 
     return `
       <tr id="row-${fi}">
         <td class="td-num">${frame.n}</td>
+        ${refCell}
         <td class="td-scan">${scanCell}</td>
-        <td class="td-time">
-          <div class="date">${fmtDate(frame.ts)}</div>
-          <div class="time">${fmtTime(frame.ts)}</div>
-        </td>
+        <td class="td-time"><div class="date">${fmtDate(frame.ts)}</div><div class="time">${fmtTime(frame.ts)}</div></td>
         <td class="td-loc">${locCell}</td>
-        <td class="td-note">${noteCell}</td>
+        <td class="td-note">${frame.note ? esc(frame.note) : '<span class="dash">—</span>'}</td>
       </tr>`;
   }).join('');
 }
 
-// ── Landing page (no URL param) ────────────────────────────────────────────────
+// ── landing page ───────────────────────────────────────────────────────────────
 function renderLanding() {
   document.getElementById('app').innerHTML = `
     <div class="landing">
-      <div class="landing-logo">🎞</div>
+      <div class="landing-icon">🎞</div>
       <h1>FilmTrack Roll Matcher</h1>
-      <p>Match your developed scans to the frame data captured on your phone —
-         timestamps, GPS locations, and notes — all without uploading anything.</p>
-      <div class="step"><strong>1.</strong> Open a roll in the <strong>FilmTrack</strong> Android app</div>
-      <div class="step"><strong>2.</strong> Tap the <strong>Share</strong> button in the top bar</div>
-      <div class="step"><strong>3.</strong> Open the link on this device and drop your scans onto the page</div>
-      <p style="margin-top:20px; font-size:12px;">
-        Roll data is encoded directly in the URL. No servers, no accounts, no uploads.
-      </p>
+      <p>Match your developed scans to the metadata captured on your phone —
+         timestamps, GPS, and notes — plus reference thumbnails so you can verify each frame.</p>
+
+      <div class="file-drop" id="landingDrop">
+        <p>Drop your <strong>.json</strong> export file here</p>
+        <button class="btn btn-accent"
+                onclick="event.stopPropagation(); document.getElementById('exportInput').click()">
+          📂 Open Export File
+        </button>
+        <p class="upload-hint" style="margin-top:10px">Exported from FilmTrack → Share button on any roll</p>
+      </div>
+
+      <div class="steps">
+        <div class="step"><strong>1.</strong> Open a roll in the <strong>FilmTrack</strong> Android app</div>
+        <div class="step"><strong>2.</strong> Tap the <strong>Share</strong> icon — save the <code>.json</code> file to this device</div>
+        <div class="step"><strong>3.</strong> Drop the file above, then drop your developed scans into the table</div>
+        <div class="step"><strong>4.</strong> Compare the <em>Reference</em> column (phone capture) with your scan to confirm alignment</div>
+      </div>
     </div>
   `;
+
+  // wire the landing drop zone
+  const zone = document.getElementById('landingDrop');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) handleExportFile(f);
+  });
+  zone.addEventListener('click', e => {
+    if (!e.target.closest('button')) document.getElementById('exportInput').click();
+  });
 }
 
 function renderError(msg) {
   document.getElementById('app').innerHTML = `
     <div class="landing">
-      <div class="landing-logo" style="font-size:36px">⚠</div>
+      <div class="landing-icon" style="font-size:36px">⚠</div>
       <h1 style="color:var(--red)">Couldn't load roll</h1>
       <p>${esc(msg)}</p>
     </div>

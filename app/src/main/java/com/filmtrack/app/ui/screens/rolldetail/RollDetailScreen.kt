@@ -69,13 +69,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.filmtrack.app.data.model.Frame
 import kotlinx.coroutines.launch
-import android.content.Intent
-import androidx.compose.ui.platform.LocalContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -90,10 +91,22 @@ fun RollDetailScreen(
     viewModel: RollDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isExporting by viewModel.isExporting.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var frameToDelete by remember { mutableStateOf<Long?>(null) }
     var frameToEdit by remember { mutableStateOf<Frame?>(null) }
     var galleryInitialIndex by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.exportReady.collect { uri ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, "Export roll"))
+        }
+    }
 
     if (frameToDelete != null) {
         AlertDialog(
@@ -167,17 +180,15 @@ fun RollDetailScreen(
                                         MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            IconButton(onClick = {
-                                viewModel.buildShareUrl()?.let { url ->
-                                    val intent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_TEXT, url)
-                                        putExtra(Intent.EXTRA_SUBJECT, "FilmTrack: ${roll.name}")
-                                    }
-                                    context.startActivity(Intent.createChooser(intent, "Share roll data"))
+                            IconButton(
+                                onClick = { viewModel.exportRoll() },
+                                enabled = !isExporting
+                            ) {
+                                if (isExporting) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                } else {
+                                    Icon(Icons.Default.Share, contentDescription = "Export roll")
                                 }
-                            }) {
-                                Icon(Icons.Default.Share, contentDescription = "Share roll data")
                             }
                             IconButton(onClick = { onApplyMetadataClick(roll.id) }) {
                                 Icon(Icons.Default.PhotoLibrary, "Apply Metadata to Scans")
