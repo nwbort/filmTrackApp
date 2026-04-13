@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -73,6 +74,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.filmtrack.app.data.model.Frame
 import kotlinx.coroutines.launch
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -87,6 +90,7 @@ fun RollDetailScreen(
     viewModel: RollDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var frameToDelete by remember { mutableStateOf<Long?>(null) }
     var frameToEdit by remember { mutableStateOf<Frame?>(null) }
     var galleryInitialIndex by remember { mutableStateOf<Int?>(null) }
@@ -162,6 +166,18 @@ fun RollDetailScreen(
                                     else
                                         MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                            IconButton(onClick = {
+                                viewModel.buildShareUrl()?.let { url ->
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, url)
+                                        putExtra(Intent.EXTRA_SUBJECT, "FilmTrack: ${roll.name}")
+                                    }
+                                    context.startActivity(Intent.createChooser(intent, "Share roll data"))
+                                }
+                            }) {
+                                Icon(Icons.Default.Share, contentDescription = "Share roll data")
                             }
                             IconButton(onClick = { onApplyMetadataClick(roll.id) }) {
                                 Icon(Icons.Default.PhotoLibrary, "Apply Metadata to Scans")

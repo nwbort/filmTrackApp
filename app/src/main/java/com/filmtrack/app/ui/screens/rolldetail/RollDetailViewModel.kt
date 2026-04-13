@@ -7,6 +7,7 @@ import com.filmtrack.app.data.model.Frame
 import com.filmtrack.app.data.model.Roll
 import com.filmtrack.app.data.repository.RollRepository
 import com.filmtrack.app.data.store.ActiveRollStore
+import com.filmtrack.app.util.RollExporter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,11 @@ class RollDetailViewModel @Inject constructor(
                 repository.updateFrame(frame.copy(note = note))
             }
         }
+    }
+
+    fun buildShareUrl(): String? {
+        val state = uiState.value
+        return state.roll?.let { RollExporter.buildShareUrl(it, state.frames) }
     }
 
     fun toggleComplete() {
